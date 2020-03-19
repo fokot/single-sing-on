@@ -1,43 +1,48 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <script src="https://apis.google.com/js/platform.js?onload=onLoad" async defer></script>
+    <meta name="google-signin-client_id" content="477400905880-35lan5cf4rvc039pqdobn7qgitn3i2rl.apps.googleusercontent.com">
     <link rel="stylesheet" type="text/css" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.2.1/js.cookie.min.js"></script>
 </head>
 <body>
-<form>
-    <div>
-        <label for="login">Login:</label>
-        <input type="text" class="x" id="login">
-    </div>
-    <div>
-        <label for="password">Password:</label>
-        <input type="password" class="x" id="password">
-    </div>
-    <button type="submit" class="x" id="button">Login</button>
-</form>
+<div class="form">
+    <div id="name"></div>
+    <button type="submit" class="x" id="button">Sign out</button>
+</div>
 
 <script>
+    function onLoad() {
+        gapi.load('auth2', function() {
+            gapi.auth2.init();
+        });
+    }
+
+    const user = Cookies.get("user");
+    if(user) {
+        document.getElementById('name').innerText = user;
+    } else {
+        window.location.replace('/login.html');
+    }
+
+    const signOut = (auth2) => {
+        auth2.getAuthInstance().signOut().then(function () {
+            console.log('User signed out.');
+            Cookies.remove("user");
+            window.location.replace('/login.html');
+        });
+    }
+
     document.getElementById('button').addEventListener("click", e => {
         e.preventDefault();
-        var q = {
-            query: "mutation login($login: String!, $password: String!) { login(login: $login, password: $password) { token } }",
-            variables: {
-                login: document.getElementById('login').value,
-                password: document.getElementById('password').value
-            }
-        };
-        var url = "/api/graphql";
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", url, true);
-        xhr.setRequestHeader("Content-type", "application/json");
-        xhr.send(JSON.stringify(q, null, 2));
-        xhr.onreadystatechange = function() {//Call a function when the state changes.
-            if(xhr.readyState > 1 && xhr.status === 200) {
-                localStorage.setItem('Authorization', JSON.parse(xhr.responseText).data.login.token);
-                window.location.replace('/graphiql');
-            } else if(xhr.readyState === 4 && xhr.status !== 200) {
-                alert("Can't login");
-            }
+        if(gapi.auth2) {
+            signOut(gapi.auth2);
+        } else {
+            gapi.load('auth2', function() {
+                gapi.auth2.init();
+                signOut(gapi.auth2);
+            });
         }
     });
 </script>

@@ -4,12 +4,14 @@ ThisBuild / organization     := "com.example"
 ThisBuild / organizationName := "example"
 
 val uzhttp = "org.polynote" %% "uzhttp" % "0.1.1"
+val googleApi = "com.google.api-client" % "google-api-client" % "1.30.9"
 
 lazy val root = (project in file("."))
   .settings(
     name := "single-sign-on",
     libraryDependencies ++= Seq(
-      uzhttp
+      uzhttp,
+      googleApi
     )
   )
 
