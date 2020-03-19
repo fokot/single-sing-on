@@ -1,0 +1,35 @@
+body {
+    height: 100%;
+    margin: 0;
+    width: 100%;
+    overflow: hidden;
+    background-color: lightgrey;
+}
+
+.g-signin2 {
+    width: 300px;
+    height: 300px;
+}
+
+div, input, button, li {
+    font-size: large;
+}
+.form {
+    width: 100px;
+    height: 100px;
+
+    position: absolute;
+    top:0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    margin: auto;
+}
+.x {
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+.x:focus{
+    border: 2px solid rgb(128, 189, 255);;
+}

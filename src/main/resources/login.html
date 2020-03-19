@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <meta name="google-signin-client_id" content="477400905880-35lan5cf4rvc039pqdobn7qgitn3i2rl.apps.googleusercontent.com">
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+
+<div class="form">
+
+<form>
+    <div>
+        <label for="login">Login:</label>
+        <input type="text" class="x" id="login">
+    </div>
+    <div>
+        <label for="password">Password:</label>
+        <input type="password" class="x" id="password">
+    </div>
+    <button type="submit" class="x" id="button">Login</button>
+</form>
+
+<div class="g-signin2" data-onsuccess="onSignIn"></div>
+
+
+</div>
+
+<script>
+    function onSignIn(googleUser) {
+        var profile = googleUser.getBasicProfile();
+        console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+        console.log('Name: ' + profile.getName());
+        console.log('Image URL: ' + profile.getImageUrl());
+        console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+        var id_token = googleUser.getAuthResponse().id_token;
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/tokensignin');
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onload = function() {
+            console.log('Signed in as: ' + xhr.responseText);
+        };
+        xhr.send('idtoken=' + id_token);
+    }
+
+
+    document.getElementById('button').addEventListener("click", e => {
+        e.preventDefault();
+        var q = {
+            query: "mutation login($login: String!, $password: String!) { login(login: $login, password: $password) { token } }",
+            variables: {
+                login: document.getElementById('login').value,
+                password: document.getElementById('password').value
+            }
+        };
+        var url = "/api/graphql";
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", url, true);
+        xhr.setRequestHeader("Content-type", "application/json");
+        xhr.send(JSON.stringify(q, null, 2));
+        xhr.onreadystatechange = function() {//Call a function when the state changes.
+            if(xhr.readyState > 1 && xhr.status === 200) {
+                localStorage.setItem('Authorization', JSON.parse(xhr.responseText).data.login.token);
+                window.location.replace('/graphiql');
+            } else if(xhr.readyState === 4 && xhr.status !== 200) {
+                alert("Can't login");
+            }
+        }
+    });
+</script>
+</body>
+</html>
